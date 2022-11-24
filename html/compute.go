@@ -43,7 +43,7 @@ type Game struct {
 	south, north, previous *Position
 	// position *after* index-house is moved; or nil if move not possible
 	moves [12]*Position
-	// tarnsposition table
+	// transposition table
 	tt *minimax.TT
 }
 
