@@ -27,8 +27,8 @@ func (tt *TT) LegalMoves(rank int64) *mech.LegalMoves {
 }
 
 // lazy memeoization
-func (tt *TT) MovesInHand(rank int64) int64 {
-	var r int64
+func (tt *TT) MovesInHand(rank int64) int8 {
+	var r int8
 
 	tt.mutex.Lock()
 	defer tt.mutex.Unlock()
@@ -47,7 +47,7 @@ func (tt *TT) MovesInHand(rank int64) int64 {
 }
 
 // sorted list of best/killer moves for a given rank
-func (tt *TT) KillerMoves(rank int64) []int64 {
+func (tt *TT) KillerMoves(rank int64) []int8 {
 	legalMoves := tt.LegalMoves(rank)
 
 	// re-sort, since the contextual information might have changed

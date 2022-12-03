@@ -2,11 +2,18 @@
 //
 // # DESIGN, TACTICS AND HACKS
 //
-// We use:
-//   - an int64 is needed to encode a position rank.
-//     this is made explicit (vs. use of int), in order to support 32-bit platforms (e.g., Rpi0W2).
-//     to avoid conversions, all other integers are int64, with the exception of array indices.
-//     array indices are int in Golang.
+// Types:
+//   - ranks are int64
+//   - stones, scores and moves are signed bytes | int8
+//   - array indices are int
+//
+// REASONS
+//   - ranks would overflow int on 32-bit architectures like Rpi0W2
+//   - a database entry shall be small (1 byte) in order to keep the size acceptable (even so: 1.4TB)
+//   - Golang requires array indices to be int
+//   - even so, some type acrobatics is required, because the flag pacakge cannot produce int8 command line arguments.
+//
+// Further:
 //   - destructive operations on *Position or *Game return a new object and do not touch the original.
 //   - cloning *Game for any destructive operation is rather efficient:
 //     only Position pointers and moves are allocated/copied.
@@ -36,8 +43,8 @@ const GAME_CAP = 24
 // the cursor is a position index
 type Game struct {
 	Positions []*Position
-	Moves     []int64
-	Cursor    int64
+	Moves     []int8
+	Cursor    int
 }
 
 ////////////////////////////////////////////////////////////////
@@ -48,8 +55,8 @@ type Game struct {
 func NewGame() *Game {
 	game := new(Game)
 	game.Positions = make([]*Position, 0, GAME_CAP)
-	game.Moves = make([]int64, 0, GAME_CAP)
-	game.Cursor = ow.ZERO
+	game.Moves = make([]int8, 0, GAME_CAP)
+	game.Cursor = 0
 	return game
 }
 
@@ -64,13 +71,12 @@ func StringToGame(rest string) *Game {
 	cur := ow.MININT
 	first := true
 
-	for aux, elem := range strings.Split(rest, "/") {
-		i := int64(aux)
+	for i, elem := range strings.Split(rest, "/") {
 		switch i {
-		case ow.ZERO:
+		case 0:
 			// server address || empty
 			continue
-		case ow.ONE:
+		case 1:
 			// initial position
 			rank, err := strconv.ParseInt(elem, 10, 64)
 			ow.Check(err)
@@ -88,7 +94,7 @@ func StringToGame(rest string) *Game {
 				ow.Panic("empty move:", i)
 			}
 
-			var move int64
+			var move int8
 
 			if elem[0] == '!' {
 				// if len(elem) == 2 {
@@ -114,7 +120,7 @@ func StringToGame(rest string) *Game {
 
 	game.Cursor = cur
 	if game.Cursor == ow.MININT {
-		game.Cursor = int64(len(game.Positions) - 1)
+		game.Cursor = len(game.Positions) - 1
 	}
 	ow.Log("cursor:", game.Cursor, "/", len(game.Positions)-1)
 
@@ -129,16 +135,15 @@ func (game *Game) String() string {
 	if len(game.Positions) != len(game.Moves)+1 {
 		ow.Panic(len(game.Positions), "positions for", len(game.Moves), "moves")
 	}
-	if game.Cursor > int64(len(game.Positions)) {
+	if game.Cursor > len(game.Positions) {
 		ow.Panic("cursor:", game.Cursor, "> #positions:", len(game.Positions))
 	}
 
 	moves := "/" + ow.Thousands(game.First().Rank())
-	for aux, move := range game.Moves {
-		i := int64(aux)
+	for i, move := range game.Moves {
 		moves += "/"
 		// no cursor needed for the last move
-		if game.Cursor == i+1 && game.Cursor < int64(len(game.Positions)-1) {
+		if game.Cursor == i+1 && game.Cursor < len(game.Positions)-1 {
 			moves += "!"
 		}
 		if ow.Even(i) {
@@ -148,7 +153,7 @@ func (game *Game) String() string {
 		}
 
 		// show score: captures or last position
-		if (i > 1 && game.Positions[i].Scores[0] != game.Positions[i+1].Scores[1]) || i == int64(len(game.Moves)-1) {
+		if (i > 1 && game.Positions[i].Scores[0] != game.Positions[i+1].Scores[1]) || i == len(game.Moves)-1 {
 			// off by 1 beacause of the initial position
 			moves += "("
 			if ow.Even(i) {
@@ -179,7 +184,7 @@ func (in *Game) Clone() *Game {
 		ow.Panic("incomplete copy: positions")
 	}
 
-	out.Moves = make([]int64, len(in.Moves))
+	out.Moves = make([]int8, len(in.Moves))
 	if copy(out.Moves, in.Moves) != len(in.Moves) {
 		ow.Panic("incomplete copy: moves")
 	}
@@ -249,7 +254,7 @@ func (game *Game) BeforeLast() *Position {
 
 // heuristic score for the current position;
 // does not change the recorded scores
-func (game *Game) Heuristic() int64 {
+func (game *Game) Heuristic() int8 {
 	position := game.Positions[game.Cursor]
 	level := ow.Level(position.Rank())
 	if ow.Even(level) {
@@ -261,7 +266,7 @@ func (game *Game) Heuristic() int64 {
 }
 
 // score of the current position
-func (game *Game) Capture() int64 {
+func (game *Game) Capture() int8 {
 	// no position before the first: use Reverse() instead
 	if len(game.Positions) < 2 || game.Cursor < 1 {
 		return game.Current().Score()
@@ -272,7 +277,7 @@ func (game *Game) Capture() int64 {
 
 // true if the last position happens more than once
 func (game *Game) Cycle() bool {
-	for i := ow.ZERO; i < int64(len(game.Positions)-1); i++ {
+	for i := ow.ZERO64; i < int64(len(game.Positions)-1); i++ {
 		if game.Last().EQ(game.Positions[i]) {
 			ow.Log("found cycle: @", ow.Thousands(len(game.Positions)-1), "== @", ow.Thousands(i))
 			return true

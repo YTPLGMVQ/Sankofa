@@ -9,8 +9,8 @@ import (
 )
 
 // infinite interval
-var Alpha = ow.MININT
-var Beta = ow.MAXINT
+var Alpha = ow.MININT8
+var Beta = ow.MAXINT8
 
 // if all the first-level successors of the root node have scores.
 // WARNING: must be called within a tt.mutex.Lock() transaction.
@@ -41,14 +41,14 @@ func (tt *TT) Finished() bool {
 // goroutine that wraps a negamax call
 //
 // DESIGN we implement batch processing with channels and method call APIs with mutexes
-func (tt *TT) Worker(α, β, depth int64) {
+func (tt *TT) Worker(α, β int8, depth int) {
 	timeStamp := time.Now().UTC().UnixNano()
 	ow.Log("α:", α, ", β:", β, ", depth:", depth)
 
 	score, game := tt.NegaMax(tt.Game(), α, β, depth)
 	game.Cursor = tt.Game().Cursor
 
-	duration := (float64(time.Now().UTC().UnixNano()) - float64(timeStamp)) / float64(ow.GIGA)
+	duration := (float64(time.Now().UTC().UnixNano()) - float64(timeStamp)) / ow.GIGA64F
 	ow.Log(game, ", [", α, "..", β, "]",
 		", duration:", strconv.FormatFloat(duration, 'f', 2, 64))
 
@@ -81,7 +81,7 @@ func (tt *TT) Worker(α, β, depth int64) {
 }
 
 // Baudet's parallel aspiration search, a divide and conquer algorithm
-func (tt *TT) Aspiration(intervals Intervals, depth int64) *TT {
+func (tt *TT) Aspiration(intervals Intervals, depth int) *TT {
 	ow.Log(tt.Game(), intervals, "depth:", depth)
 
 	// start one worker per interval

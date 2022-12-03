@@ -6,7 +6,8 @@ import (
 
 // a range (interval) containing a score
 type Interval struct {
-	rank, low, high int64
+	rank      int64
+	low, high int8
 }
 
 // for logging and HTML output
@@ -14,11 +15,11 @@ func (interval *Interval) String() string {
 	switch {
 	case interval == nil:
 		return "∅"
-	case interval.low == ow.MININT && interval.high == ow.MAXINT:
+	case interval.low == ow.MININT8 && interval.high == ow.MAXINT8:
 		return "∀"
-	case interval.low == ow.MININT:
+	case interval.low == ow.MININT8:
 		return "≤" + ow.Thousands(interval.high)
-	case interval.high == ow.MAXINT:
+	case interval.high == ow.MAXINT8:
 		return "≥" + ow.Thousands(interval.low)
 	case interval.low == interval.high:
 		return ow.Thousands(interval.low)
@@ -27,7 +28,7 @@ func (interval *Interval) String() string {
 	}
 }
 
-func NewInterval(rank, low, high int64) *Interval {
+func NewInterval(rank int64, low, high int8) *Interval {
 	r := new(Interval)
 	r.rank = rank
 	level := ow.Level(rank)
@@ -60,7 +61,7 @@ func (interval *Interval) IsFinal() bool {
 	return interval.low == interval.high
 }
 
-func (interval *Interval) Score() int64 {
+func (interval *Interval) Score() int8 {
 	if interval.IsFinal() {
 		return interval.low
 	} else {
@@ -68,7 +69,7 @@ func (interval *Interval) Score() int64 {
 	}
 
 	// pro forma
-	return ow.MININT
+	return ow.MININT8
 }
 
 func (one *Interval) EQ(two *Interval) bool {

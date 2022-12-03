@@ -28,8 +28,8 @@ var hist [49][97]int64
 func init() {
 	// logging is always turned on here, because the command line flags were not processed yet.
 	// we start at 1, and look back at level 0 with no relevant positions.
-	for level := ow.ONE; level < 49; level++ {
-		for stones := ow.ZERO; stones <= level; stones++ {
+	for level := ow.ONE8; level < 49; level++ {
+		for stones := ow.ZERO8; stones <= level; stones++ {
 			// no scores for the unreachable level 47
 			if level == 47 {
 				continue
@@ -55,21 +55,21 @@ const INT_INC = 2
 // number of reserved partition intervals
 const INT_CAP = 8
 
-type Intervals [][2]int64
+type Intervals [][2]int8
 
-func NewIntervals(α, β, partitions int64) (r Intervals) {
+func NewIntervals(α, β int8, partitions int) (r Intervals) {
 	r = make(Intervals, 0, INT_CAP)
 	last := α
-	for i := ow.ONE; i < partitions; i++ {
+	for i := 1; i < partitions; i++ {
 		if β-last < INT_INC {
 			ow.Log("no place left at:", i)
 			break
 		}
-		r = append(r, [2]int64{last, last + INT_INC})
+		r = append(r, [2]int8{last, last + INT_INC})
 		last += INT_INC
 	}
 	if last < β || α == β {
-		r = append(r, [2]int64{last, β})
+		r = append(r, [2]int8{last, β})
 	}
 
 	return
@@ -103,13 +103,13 @@ func (one Intervals) EQ(two Intervals) bool {
 ////////////////////////////////////////////////////////////////
 
 // standard deviation of the empirical quartiles distribution found in "intervals"
-func (intervals Intervals) SD(level int64) (SD float64) {
+func (intervals Intervals) SD(level int8) (SD float64) {
 
 	Σ0 := float64(len(intervals))
 	var Σ1, Σ2 float64
 	for i := 0; i < len(intervals); i++ {
 		// increment Σx and Σx²
-		x := ow.ZERO
+		x := ow.ZERO64
 		for j := intervals[i][0]; j <= intervals[i][1]; j++ {
 			x += hist[level][j+OFFSET]
 		}
@@ -122,8 +122,8 @@ func (intervals Intervals) SD(level int64) (SD float64) {
 }
 
 // shift a stake one position to the left; return success value
-func (intervals Intervals) SHL(pos int64) bool {
-	if pos < ow.ONE || pos > int64(len(intervals)-1) {
+func (intervals Intervals) SHL(pos int) bool {
+	if pos < 1 || pos > len(intervals)-1 {
 		ow.Panic("position:", pos, "intervals:", intervals, "OUT OF RANGE")
 	}
 
@@ -139,8 +139,8 @@ func (intervals Intervals) SHL(pos int64) bool {
 }
 
 // shift a stake one position to the right; return success value
-func (intervals Intervals) SHR(pos int64) bool {
-	if pos < ow.ONE || pos > int64(len(intervals)-1) {
+func (intervals Intervals) SHR(pos int) bool {
+	if pos < 1 || pos > len(intervals)-1 {
 		ow.Panic("position:", pos, "intervals:", intervals, "OUT OF RANGE")
 	}
 
@@ -157,7 +157,7 @@ func (intervals Intervals) SHR(pos int64) bool {
 
 // n-wise partitioning a list (or however it's called) appears to be an NP-complete problem;
 // gradient descent searches for a local minimum; this is good enough for our purposes and pretty fast
-func (intervals Intervals) GradientDescent(level int64) {
+func (intervals Intervals) GradientDescent(level int8) {
 	ow.Log(intervals)
 
 	// gradient descent in the partition shift-space
@@ -166,7 +166,7 @@ func (intervals Intervals) GradientDescent(level int64) {
 	found := true
 	for found {
 		found = false
-		for stake := ow.ONE; stake < int64(len(intervals)); stake++ {
+		for stake := 1; stake < len(intervals); stake++ {
 			// one direction, then the opposite
 			if intervals.SHR(stake) {
 				a := intervals.SD(level) // compute once; it is costly
@@ -195,7 +195,7 @@ func (intervals Intervals) GradientDescent(level int64) {
 }
 
 // split the α—β interval into =partitions equal quartiles using a gradient descent algorithm.
-func Quartiles(α, β, level, partitions int64) (r Intervals) {
+func Quartiles(α, β, level int8, partitions int) (r Intervals) {
 	ow.Log("Quartiles: α:", α, "β:", β, "level:", level, "partitions:", partitions)
 
 	r = NewIntervals(ow.Max(α, -level), ow.Min(β, level), partitions)

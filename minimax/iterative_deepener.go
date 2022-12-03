@@ -17,7 +17,7 @@ func (tt *TT) Terminator(limit float64) {
 }
 
 // iterative depender with duration limit; result in transposition table
-func (tt *TT) Explore(goroutines int64, limit float64) *TT {
+func (tt *TT) Explore(goroutines int, limit float64) *TT {
 	// to restore initial conditions
 	game := tt.Game()
 
@@ -26,7 +26,7 @@ func (tt *TT) Explore(goroutines int64, limit float64) *TT {
 
 	// -t Trace disables parallelism
 	if Trace {
-		goroutines = ow.ONE
+		goroutines = 1
 		ow.Log("trace: no parallism:", goroutines, "goroutines")
 	}
 
@@ -39,7 +39,7 @@ func (tt *TT) Explore(goroutines int64, limit float64) *TT {
 
 	// iterative deepening
 	go tt.Terminator(limit)
-	for depth := ow.TWO; !tt.DeepenerAborted(); depth += 1 {
+	for depth := 2; !tt.DeepenerAborted(); depth += 1 {
 		// need transaction here, not to lose .abort!!!
 		tt = tt.Restart().setGame(game).Aspiration(intervals, depth)
 		ow.Log(tt.Game(), "depth:", depth)

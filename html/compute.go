@@ -17,7 +17,7 @@ import (
 var DurationLimit = float64(1)
 
 // degree of parallelism
-var Goroutines = int64(4)
+var Goroutines = 5
 
 ////////////////////////////////////////////////////////////////
 // TYPES
@@ -29,7 +29,8 @@ type Position struct {
 	αβ string
 	// δν: advantage in degrees of freedom
 	// changed: Δ the number of stones in the house
-	rank, δν, changed int64
+	rank        int64
+	δν, changed int8
 	// movable: can we move this house?
 	// scored: has a valid score?
 	// attack: this moves captures stones

@@ -37,7 +37,7 @@ var Complete bool
 
 // fail-soft NegaMax with α—β pruning and killer-move heuristic;
 // result in return values, not in *TT
-func (tt *TT) NegaMax(game *mech.Game, α, β, depth int64) (int64, *mech.Game) {
+func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game) {
 	// visit this node
 	tt.incVisited()
 
@@ -111,7 +111,7 @@ func (tt *TT) NegaMax(game *mech.Game, α, β, depth int64) (int64, *mech.Game) 
 
 	// "game" imutable
 	bestGame := game.Clone()
-	bestScore := ow.MININT
+	bestScore := ow.MININT8
 
 	// side
 	side := "♟︎"
@@ -124,7 +124,7 @@ func (tt *TT) NegaMax(game *mech.Game, α, β, depth int64) (int64, *mech.Game) 
 		ow.Log(game, "rank:", rank, "killer move:", mech.MoveToString(move), "⇢ successor:", legalMoves.Next[move], ", captures:", legalMoves.Score[move])
 		ow.Log(game, "α:", α, ", best score:", bestScore, ", β:", β)
 
-		var s int64
+		var s int8
 		var g *mech.Game
 		// first level may not trim α—β interval because we need exact scores (not intervals)
 		if Complete || tt.Depth()-depth <= 1 {
@@ -179,7 +179,7 @@ func (tt *TT) NegaMax(game *mech.Game, α, β, depth int64) (int64, *mech.Game) 
 	ow.Log(game, "⇠α—β: game:", game, "|", game.Current().Board, "score:", bestScore)
 
 	// cannot happen, since a move is guaranteed to exist (starved check above)
-	if bestScore == ow.MININT {
+	if bestScore == ow.MININT8 {
 		ow.Panic("recursion on a final position")
 	}
 

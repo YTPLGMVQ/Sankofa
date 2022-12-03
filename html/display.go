@@ -147,7 +147,7 @@ func Display(rest string) string {
 		// move on reflected board
 		j := i - mech.NORTHLEFT
 		if ow.Odd(Analysis.game.Cursor) && Analysis.moves[i].movable &&
-			!(Analysis.game.Cursor == int64(len(Analysis.game.Positions)-1) && Analysis.game.GameOver()) {
+			!(Analysis.game.Cursor == len(Analysis.game.Positions)-1 && Analysis.game.GameOver()) {
 			html += "<td title=\"play " + mech.MoveToString(i) + "\">\n<a href=\""
 			html += Analysis.game.Move(j).String() + "\">\n"
 			html += SVG(Analysis.south.position.Board[i], Analysis.moves[i].changed, Analysis.moves[i].check, false) + "</a>\n</td>\n"
@@ -171,7 +171,7 @@ func Display(rest string) string {
 	// images
 	for i := mech.SOUTHLEFT; i <= mech.SOUTHRIGHT; i++ {
 		if ow.Even(Analysis.game.Cursor) && Analysis.moves[i].movable &&
-			!(Analysis.game.Cursor == int64(len(Analysis.game.Positions)-1) && Analysis.game.GameOver()) {
+			!(Analysis.game.Cursor == len(Analysis.game.Positions)-1 && Analysis.game.GameOver()) {
 			html += "<td title=\"play " + mech.MoveToString(i) + "\">\n<a href=\""
 			html += Analysis.game.Move(i).String() + "\">\n"
 			html += SVG(Analysis.south.position.Board[i], Analysis.moves[i].changed, Analysis.moves[i].check, false) + "</a>\n</td>\n"
@@ -280,13 +280,12 @@ func Display(rest string) string {
 	// display α—β continuation only if the cursor is at the last position.
 	var continuation bool
 	clone := game.Clone()
-	if game.Cursor == int64(len(game.Positions)-1) {
+	if game.Cursor == len(game.Positions)-1 {
 		clone = Analysis.game.Clone()
 		continuation = true
 	}
 
-	for aux, position := range clone.Positions {
-		i := int64(aux)
+	for i, position := range clone.Positions {
 		// skip initial position: it has no leading move
 		if i == 0 {
 			continue
@@ -313,7 +312,7 @@ func Display(rest string) string {
 			move += "+" + ow.Thousands(delta)
 		}
 		if clone.GameOver() || clone.Cycle() || clone.Last().IsStarved() {
-			if i == int64(len(clone.Positions)-1) {
+			if i == len(clone.Positions)-1 {
 				move += " Ω"
 			}
 		}
@@ -405,6 +404,6 @@ Copyright ©2019-2022 Carlo Monte.
 </body>
 </html>
 `
-	fmt.Printf("%.2f seconds\n", float64(time.Now().UTC().UnixNano()-Analysis.tt.Begin())/float64(ow.GIGA))
+	fmt.Printf("%.2f seconds\n", float64(time.Now().UTC().UnixNano()-Analysis.tt.Begin())/ow.GIGA64F)
 	return html
 }

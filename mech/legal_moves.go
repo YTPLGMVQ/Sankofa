@@ -11,23 +11,23 @@ type LegalMoves struct {
 	// sorted keys=moves
 	// * killer-move heuristic
 	// * consistent String output
-	Moves []int64
+	Moves []int8
 
 	// move ⇢ next rank
-	Next map[int64]int64
+	Next map[int8]int64
 
 	// move ⇢ score
-	Score map[int64]int64
+	Score map[int8]int8
 }
 
 // empty LegalMoves structure
 func NewLegalMoves() *LegalMoves {
 	r := new(LegalMoves)
 
-	r.Rank = ow.MININT
-	r.Moves = make([]int64, 0, MOVE_CAP)
-	r.Next = make(map[int64]int64, MOVE_CAP)
-	r.Score = make(map[int64]int64, MOVE_CAP)
+	r.Rank = ow.MININT64
+	r.Moves = make([]int8, 0, MOVE_CAP)
+	r.Next = make(map[int8]int64, MOVE_CAP)
+	r.Score = make(map[int8]int8, MOVE_CAP)
 
 	return r
 }
@@ -36,15 +36,15 @@ func (in *LegalMoves) Clone() *LegalMoves {
 	out := NewLegalMoves()
 	out.Rank = in.Rank
 
-	out.Moves = make([]int64, len(in.Moves))
+	out.Moves = make([]int8, len(in.Moves))
 	copy(out.Moves, in.Moves)
 
-	out.Next = make(map[int64]int64, len(in.Next))
+	out.Next = make(map[int8]int64, len(in.Next))
 	for k, v := range in.Next {
 		out.Next[k] = v
 	}
 
-	out.Score = make(map[int64]int64, len(in.Score))
+	out.Score = make(map[int8]int8, len(in.Score))
 	for k, v := range in.Score {
 		out.Score[k] = v
 	}
@@ -56,7 +56,6 @@ func (legalMoves *LegalMoves) String() string {
 	r := ow.Thousands(legalMoves.Rank) + " ⇢ "
 
 	for _, key := range legalMoves.Moves {
-		// for key, value := range legalMoves.Next {
 		r += MoveToString(key) + "=" + ow.Thousands(legalMoves.Next[key]) + "/" + ow.Thousands(legalMoves.Score[key]) + " "
 	}
 

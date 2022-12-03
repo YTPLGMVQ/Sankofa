@@ -38,7 +38,7 @@ type TT struct {
 
 	// memoization of CPU-intensive evaluations
 	legalMoves  map[int64]*mech.LegalMoves
-	movesInHand map[int64]int64
+	movesInHand map[int64]int8
 
 	// timers
 	globalTimeStamp    int64
@@ -51,24 +51,24 @@ type TT struct {
 	// synchronization
 	mutex     sync.RWMutex    // data access
 	waitGroup *sync.WaitGroup // everybddy is done (parallel aspiration)
-	cntWg     int64           // wait group counter
+	cntWg     int             // wait group counter
 
 	// timed out
 	cancelIteration chan struct{} // cancellation signal for an iteration
 	cancelDeepener  chan struct{} // cancellation signal for the iterative deepener
 
 	// counters
-	base           int64 // distance from bottom; ideally it should be 0
-	depth          int64 // depth of the current deepener iteration
-	visited        int64 // visied nodes: total
-	cumVisited     int64 // cumulative visited nodes (all iterations)
-	cntTt          int64 // retrievals from the transposition table
-	cntLegalMoves  int64 // retrievals from the legalMoves table
-	cntMovesInHand int64 // retrievals from the movesInHand table
-	cutOff         int64 // number of cutoffs
-	over           int64 // game over (won, starved or cycle)
-	bottom         int64 // number of heurstic nodes at the bottom of the tree
-	killed         int64 // number of interrupted goroutines
+	base           int // distance from bottom; ideally it should be 0
+	depth          int // depth of the current deepener iteration
+	visited        int // visied nodes: total
+	cumVisited     int // cumulative visited nodes (all iterations)
+	cntTt          int // retrievals from the transposition table
+	cntLegalMoves  int // retrievals from the legalMoves table
+	cntMovesInHand int // retrievals from the movesInHand table
+	cutOff         int // number of cutoffs
+	over           int // game over (won, starved or cycle)
+	bottom         int // number of heurstic nodes at the bottom of the tree
+	killed         int // number of interrupted goroutines
 }
 
 ////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ func NewTT(game *mech.Game) *TT {
 	tt := new(TT)
 	tt.tt = make(map[int64]*Interval, TT_CAP)
 	tt.legalMoves = make(map[int64]*mech.LegalMoves, TT_CAP)
-	tt.movesInHand = make(map[int64]int64, TT_CAP)
+	tt.movesInHand = make(map[int64]int8, TT_CAP)
 
 	tt.globalTimeStamp = time.Now().UTC().UnixNano()
 	tt.iterationTimeStamp = time.Now().UTC().UnixNano()
@@ -114,7 +114,7 @@ func (tt *TT) String() string {
 		", #rd: " + ow.Thousands(tt.cntLegalMoves) +
 		" | Δν: size: " + ow.Thousands(len(tt.movesInHand)) +
 		", #rd: " + ow.Thousands(tt.cntMovesInHand) +
-		" | " + strconv.FormatFloat((float64(time.Now().UTC().UnixNano())-float64(tt.iterationTimeStamp))/float64(ow.GIGA), 'f', 2, 64) + " sec."
+		" | " + strconv.FormatFloat((float64(time.Now().UTC().UnixNano())-float64(tt.iterationTimeStamp))/ow.GIGA64F, 'f', 2, 64) + " sec."
 
 	return r
 }
@@ -152,7 +152,7 @@ func (tt *TT) Begin() int64 {
 }
 
 // add to a given partial score more partial information from a parallel aspiration thread
-func (tt *TT) setScore(rank, α, β, score int64) *TT {
+func (tt *TT) setScore(rank int64, α, β, score int8) *TT {
 	ow.Log("rank:", rank, ", α:", α, ", score:", score, ", β:", β)
 	if β < α {
 		ow.Panic("rank:", rank, "α=", α, " > β=", β)
@@ -171,7 +171,7 @@ func (tt *TT) setScore(rank, α, β, score int64) *TT {
 	// if not, create one
 	if !ok {
 		// or create it if not
-		old = NewInterval(rank, ow.MININT, ow.MAXINT)
+		old = NewInterval(rank, ow.MININT8, ow.MAXINT8)
 	} else if old.IsFinal() {
 		return tt
 	}
@@ -394,7 +394,7 @@ func (tt *TT) Restart() *TT {
 ////////////////////////////////////////////////////////////////
 
 // update depth
-func (tt *TT) setDepth(depth int64) *TT {
+func (tt *TT) setDepth(depth int) *TT {
 	tt.mutex.Lock()
 	defer tt.mutex.Unlock()
 
@@ -403,7 +403,7 @@ func (tt *TT) setDepth(depth int64) *TT {
 }
 
 // update base
-func (tt *TT) setBase(depth int64) *TT {
+func (tt *TT) setBase(depth int) *TT {
 	tt.mutex.Lock()
 	defer tt.mutex.Unlock()
 
@@ -412,7 +412,7 @@ func (tt *TT) setBase(depth int64) *TT {
 }
 
 // get current iteration depth
-func (tt *TT) Depth() int64 {
+func (tt *TT) Depth() int {
 	tt.mutex.RLock()
 	defer tt.mutex.RUnlock()
 
@@ -421,7 +421,7 @@ func (tt *TT) Depth() int64 {
 }
 
 // get distance between current iteration depth and actually reached depth.
-func (tt *TT) Base() int64 {
+func (tt *TT) Base() int {
 	tt.mutex.RLock()
 	defer tt.mutex.RUnlock()
 

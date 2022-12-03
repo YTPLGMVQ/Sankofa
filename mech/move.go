@@ -17,7 +17,7 @@ const MOVE_CAP = 6
 
 // move names using the ABCDEFabcdef notation
 const (
-	A int64 = iota
+	A int8 = iota
 	B
 	C
 	D
@@ -32,8 +32,8 @@ const (
 )
 
 // letter to move object
-func StringToMove(external string) int64 {
-	var move int64
+func StringToMove(external string) int8 {
+	var move int8
 	switch external {
 	case "A":
 		move = A
@@ -66,7 +66,7 @@ func StringToMove(external string) int64 {
 }
 
 // corresponding move on the other side of the table
-func Swap(move int64) (x int64) {
+func Swap(move int8) (x int8) {
 	switch move {
 	case A:
 		x = a
@@ -98,7 +98,7 @@ func Swap(move int64) (x int64) {
 	return x
 }
 
-func MoveToString(move int64) (s string) {
+func MoveToString(move int8) (s string) {
 	switch move {
 	case F:
 		s = "F"
@@ -135,7 +135,7 @@ func MoveToString(move int64) (s string) {
 ////////////////////////////////////////////////////////////////
 
 // execute a move on a position; return new position
-func (in *Position) Move(move int64) *Position {
+func (in *Position) Move(move int8) *Position {
 	// plausibility: are there any stones to move?
 	stones := in.Board[move]
 	if stones == 0 {
@@ -185,7 +185,7 @@ func (in *Position) Move(move int64) *Position {
 }
 
 // execute a move from the current (cursor) position; return a new game
-func (in *Game) Move(move int64) *Game {
+func (in *Game) Move(move int8) *Game {
 	out := NewGame()
 
 	out.Positions = make([]*Position, int(in.Cursor)+1)
@@ -193,7 +193,7 @@ func (in *Game) Move(move int64) *Game {
 		ow.Panic("incomplete copy: positions")
 	}
 
-	out.Moves = make([]int64, int(in.Cursor))
+	out.Moves = make([]int8, int(in.Cursor))
 	if copy(out.Moves, in.Moves[:in.Cursor]) != int(in.Cursor) {
 		ow.Panic("incomplete copy: moves")
 	}
@@ -217,7 +217,7 @@ func (in *Game) Move(move int64) *Game {
 }
 
 // moves in hand with one house and an empty interval at right; helper method
-func countMoves(stones, interval int64) (moves, rest int64) {
+func countMoves(stones, interval int8) (moves, rest int8) {
 	if stones > interval {
 		rest = stones - interval
 		stones = interval
@@ -232,16 +232,16 @@ func countMoves(stones, interval int64) (moves, rest int64) {
 }
 
 // maximum number of consecutive moves without reaching to the opponent's side
-func (position *Position) MovesInHand() int64 {
-	mih := ow.ZERO
-	intervals := make([]int64, 0, MOVE_CAP)
-	intervals = append(intervals, ow.ONE)
+func (position *Position) MovesInHand() int8 {
+	mih := ow.ZERO8
+	intervals := make([]int8, 0, MOVE_CAP)
+	intervals = append(intervals, ow.ONE8)
 
 	// SOUTHRIGHT cannot possibly be moved without affecting the opponent's board
 	for i := SOUTHRIGHT - 1; i >= SOUTHLEFT; i-- {
 		// new interval at each obstacle
 		if position.Board[i] > SOUTHRIGHT-i {
-			intervals = append(intervals, ow.ONE)
+			intervals = append(intervals, ow.ONE8)
 			continue
 		}
 
@@ -254,7 +254,7 @@ func (position *Position) MovesInHand() int64 {
 			// count moves in each interval
 			for j := len(intervals) - 1; rest > 0 && j >= 0; j-- {
 				ow.Log("j:", j, "rest:", rest)
-				var moves int64
+				var moves int8
 				moves, rest = countMoves(rest, intervals[j])
 				mih += moves
 			}

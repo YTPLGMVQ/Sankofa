@@ -43,7 +43,7 @@ Copyright ©2019-2022 Carlo Monte.
 
 	// command line
 	var ipPort string
-	flag.Int64Var(&html.Goroutines, "g", 5, "number of parallel Go-routines")
+	flag.IntVar(&html.Goroutines, "g", 5, "number of parallel Go-routines")
 	flag.StringVar(&ipPort, "i", "localhost:10000", "listen on IP:Port")
 	flag.Float64Var(&html.DurationLimit, "t", 1, "response time  in seconds")
 	flag.BoolVar(&ow.Verbose, "v", false, "verbose")

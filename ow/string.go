@@ -11,8 +11,8 @@ import (
 ////////////////////////////////////////////////////////////////
 
 // boolean to string
-func YesNo(tellMe bool) string {
-	if tellMe {
+func YesNo(tell bool) string {
+	if tell {
 		return "yes"
 	} else {
 		return "no"
@@ -20,16 +20,16 @@ func YesNo(tellMe bool) string {
 }
 
 // integer to string
-func Thousands[N int | int64](n ...N) string {
+func Thousands[N int8 | int64 | int](n ...N) string {
 	var r string
 	var plural bool
 
 	for i, v := range n {
 		m := int64(v)
 		switch {
-		case m == MININT:
+		case m == MININT64:
 			r += "-∞"
-		case m == MAXINT:
+		case m == MAXINT64:
 			r += "+∞"
 		default:
 			r += strconv.FormatInt(m, 10)

@@ -13,8 +13,8 @@ import (
 
 // position = board + score
 type Position struct {
-	Board  Board    // number of stones in each house
-	Scores [2]int64 // scores
+	Board  Board   // number of stones in each house
+	Scores [2]int8 // scores
 }
 
 ////////////////////////////////////////////////////////////////
@@ -44,13 +44,13 @@ func (position *Position) String() string {
 
 // bijection; assigns each position a distinct rank in the contiguous interval [0, MAX]
 func (position *Position) Rank() int64 {
-	var combinadics [13]int64
+	var combinadics [13]int8
 	combinadics[0] = -1
 	for i := SOUTHLEFT; i <= NORTHRIGHT; i++ {
 		combinadics[i+1] = combinadics[i] + position.Board[i] + 1
 	}
 
-	rank := int64(-1)
+	rank := ow.MINUSONE64
 	for i, c := range combinadics {
 		rank = rank + ow.Binomial(int64(c), int64(i))
 	}
@@ -67,12 +67,12 @@ func Unrank(rank int64) *Position {
 	if rank < MINRANK || MAXRANK > 1399358844974 {
 		ow.Panic("out of range: ", rank)
 	}
-	var combinadics [13]int64
+	var combinadics [13]int8
 	position := new(Position)
 	rest := rank
-	for d := int64(12); d > 0; d-- {
-		var i int64
-		for i = ow.ZERO; ow.Binomial(i+1, d) <= rest; {
+	for d := int8(12); d > 0; d-- {
+		var i int8
+		for i = ow.ZERO8; ow.Binomial(i+1, d) <= rest; {
 			i = i + 1
 		}
 		combinadics[d] = i
@@ -100,7 +100,7 @@ func (in *Position) Clone() *Position {
 	return out
 }
 
-// reverse board and the score; the opponent moves
+// reverse board and the score; the opponent int8s
 func (in *Position) Reverse() *Position {
 	out := in.Clone()
 	out.Scores[0], out.Scores[1] = in.Scores[1], in.Scores[0]
@@ -115,7 +115,7 @@ func (in *Position) Reverse() *Position {
 }
 
 // change the number of stones in a house by a given count
-func (in *Position) Edit(i, count int64) *Position {
+func (in *Position) Edit(i, count int8) *Position {
 	out := in.Clone()
 
 	// avoid overflows
@@ -135,8 +135,8 @@ func (this *Position) EQ(other *Position) bool {
 }
 
 // number of stones on the northern side of the board
-func (position *Position) NorthStones() int64 {
-	var stones int64
+func (position *Position) NorthStones() int8 {
+	var stones int8
 	for i := NORTHLEFT; i <= NORTHRIGHT; i++ {
 		stones += position.Board[i]
 	}
@@ -144,8 +144,8 @@ func (position *Position) NorthStones() int64 {
 }
 
 // number of stones on the southern side of the board
-func (position *Position) SouthStones() int64 {
-	var stones int64
+func (position *Position) SouthStones() int8 {
+	var stones int8
 	for i := SOUTHLEFT; i <= SOUTHRIGHT; i++ {
 		stones += position.Board[i]
 	}
@@ -153,23 +153,23 @@ func (position *Position) SouthStones() int64 {
 }
 
 // total number of stones on the board
-func (position *Position) Stones() int64 {
+func (position *Position) Stones() int8 {
 	return position.SouthStones() + position.NorthStones()
 }
 
 // score when each player takes the stones on her side
-func (position *Position) Split() int64 {
+func (position *Position) Split() int8 {
 	return position.SouthStones() - position.NorthStones()
 }
 
 // score at this position;
-// Game.Move() etc. is responsibile for the book keeping
-func (position *Position) Score() int64 {
+// Game.int8() etc. is responsibile for the book keeping
+func (position *Position) Score() int8 {
 	return position.Scores[0] - position.Scores[1]
 }
 
 // is South left without stones (starved)?;
-// starving the opponent is allowed only when there are no feeding moves left
+// starving the opponent is allowed only when there are no feeding int8s left
 func (position *Position) IsStarved() bool {
 	for i := SOUTHLEFT; i <= SOUTHRIGHT; i++ {
 		if position.Board[i] > 0 {

@@ -15,31 +15,31 @@ var bin [256][256]int64
 
 // memoize binomial coefficients within a plausible range
 func init() {
-	for n := ZERO; n < 256; n++ {
-		for k := ZERO; k <= n; k++ {
+	for n := ZERO64; n < 256; n++ {
+		for k := ZERO64; k <= n; k++ {
 			bin[n][k] = _binomial(n, k)
 		}
 	}
 }
 
 // combinations of n taken by k without repetitions
-func _binomial(n, k int64) int64 {
+func _binomial[N int8 | int64 | int](n, k N) int64 {
 	// be lazy
 	if 2*k > n {
 		return _binomial(n, n-k)
 	}
 
 	// factorials(
-	c := ONE
-	for i := ONE; i <= k; i++ {
-		c *= (n - i + 1)
+	c := ONE64
+	for i := ONE64; i <= int64(k); i++ {
+		c *= (int64(n) - i + 1)
 		c /= i
 	}
 	return c
 }
 
 // combinations of n taken by k without repetitions
-func Binomial(n, k int64) int64 {
+func Binomial[N int8 | int64 | int](n, k N) int64 {
 	// out of bounds
 	if k == 0 || k == n {
 		return 1
@@ -51,6 +51,6 @@ func Binomial(n, k int64) int64 {
 }
 
 // combinations of n taken by k WITH repetitions
-func Repetitions(n, k int64) int64 {
+func Repetitions[N int8 | int64 | int](n, k N) int64 {
 	return Binomial(n+k-1, k)
 }

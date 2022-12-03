@@ -11,10 +11,10 @@ import (
 // trace single-threaded negamax?
 var Trace bool
 
-func scoreString(len, score int64) string {
+func scoreString(len int, score int8) string {
 	switch {
-	case score == ow.MININT || score == ow.MAXINT:
-		return ow.Thousands(ow.MININT)
+	case score == ow.MININT8 || score == ow.MAXINT8:
+		return ow.Thousands(ow.MININT64) // i.e., ∞
 	case ow.Even(len):
 		return ow.Thousands(score)
 	default:
@@ -23,7 +23,7 @@ func scoreString(len, score int64) string {
 }
 
 // normalize α—β interval w.r.t. odd/even ply depth
-func αβString(len, α, β int64) string {
+func αβString(len int, α, β int8) string {
 	switch {
 	case ow.Even(len):
 		return ow.Thousands(α, β)
@@ -33,7 +33,7 @@ func αβString(len, α, β int64) string {
 }
 
 // show how a score is built from the parts left and right of the cursor
-func joinScore(game *mech.Game, score int64) string {
+func joinScore(game *mech.Game, score int8) string {
 
 	// cumulated score up to the cursor
 	join := scoreString(game.Cursor-1, game.BeforeCurrent().Score())
@@ -46,13 +46,13 @@ func joinScore(game *mech.Game, score int64) string {
 
 	// game score: on the last position
 	join += "⇢"
-	join += scoreString(int64(len(game.Moves)), game.Last().Score())
+	join += scoreString(len(game.Moves), game.Last().Score())
 
 	return join
 }
 
 // uniform trace messages
-func trace(what string, game *mech.Game, score, α, β int64, legalMoves *mech.LegalMoves) {
+func trace(what string, game *mech.Game, score, α, β int8, legalMoves *mech.LegalMoves) {
 	if Trace {
 
 		// off by 1 beacause of the initial position

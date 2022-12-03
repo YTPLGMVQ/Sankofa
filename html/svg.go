@@ -47,7 +47,7 @@ var combPosition = [][]float64{
 }
 
 // a ring of stones, randomly rotated
-func ring(count, moved int64) string {
+func ring(count, moved int8) string {
 	ow.Log(count, moved)
 	var r string
 
@@ -63,7 +63,7 @@ func ring(count, moved int64) string {
 	} else {
 		// random rotation of sone placement
 		Rnd := ow.Rng.Float64() * 2 * math.Pi
-		for i := ow.ZERO; i < count; i++ {
+		for i := ow.ZERO8; i < count; i++ {
 			I := float64(i)
 			φ := math.Pi * (2*I/countFloat + Rnd)
 			X := svgRadius + RingRadius*math.Cos(φ)*spacer
@@ -81,13 +81,13 @@ func ring(count, moved int64) string {
 
 // stones placed on specific positions on a honeybee comb
 // the orientation is somewhat random, for a more natural look
-func comb(count, moved int64) string {
+func comb(count, moved int8) string {
 	ow.Log(count, moved)
 	var r string
 	Rnd := ow.Rng.Float64() * float64(2) * math.Pi
 	sin, cos := math.Sincos(Rnd)
 	ow.Log(Rnd, sin, cos)
-	for i := ow.ZERO; i < count; i++ {
+	for i := ow.ZERO8; i < count; i++ {
 		x := svgRadius + combPosition[i][0]*cos - combPosition[i][1]*sin
 		y := svgRadius + combPosition[i][0]*sin + combPosition[i][1]*cos
 		if i >= count-moved {
@@ -100,7 +100,7 @@ func comb(count, moved int64) string {
 }
 
 // random place stones in huge houses
-func random(count, moved int64) string {
+func random(count, moved int8) string {
 	ow.Log(count, moved)
 	var r string
 
@@ -110,7 +110,7 @@ func random(count, moved int64) string {
 	RingRadius := stoneRadius / math.Sin(math.Pi/randomRing)
 
 	// random rotation of sone placement
-	for i := ow.ZERO; i < count-randomLimit; i++ {
+	for i := ow.ZERO8; i < count-randomLimit; i++ {
 		I := float64(i)
 		R := ow.Rng.Float64() * RingRadius
 		φ := math.Pi * (2*I/(countFloat-randomLimit) + ow.Rng.Float64()*2*math.Pi)
@@ -127,7 +127,7 @@ func random(count, moved int64) string {
 }
 
 // facade for various stone placement functions
-func stones(count, moved int64) string {
+func stones(count, moved int8) string {
 	var r string
 
 	switch {
@@ -143,7 +143,7 @@ func stones(count, moved int64) string {
 }
 
 // create a string with an SVG diagram of a house
-func SVG(count, moved int64, check, embedCSS bool) string {
+func SVG(count, moved int8, check, embedCSS bool) string {
 	var r string
 	if embedCSS {
 		r += fmt.Sprintf("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"%f\" height=\"%f\">\n", 2*svgRadius, 2*svgRadius)
