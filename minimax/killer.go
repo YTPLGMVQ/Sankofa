@@ -6,6 +6,30 @@ import (
 	"sort"
 )
 
+// no-lock: position for rank
+func (tt *TT) _position(rank int64) *mech.Position {
+	var r *mech.Position
+
+	// get it if available
+	r, ok := tt.positions[rank]
+
+	if !ok {
+		// or create it if not
+		r = mech.Unrank(rank)
+		tt.positions[rank] = r
+	}
+
+	return r
+}
+
+// position for given rank; lazy memoization
+func (tt *TT) Position(rank int64) *mech.Position {
+	tt.mutex.Lock()
+	defer tt.mutex.Unlock()
+
+	return tt._position(rank)
+}
+
 // μολων λαβε; lazy memeoization
 func (tt *TT) LegalMoves(rank int64) *mech.LegalMoves {
 	var r *mech.LegalMoves
@@ -19,7 +43,8 @@ func (tt *TT) LegalMoves(rank int64) *mech.LegalMoves {
 
 	if !ok {
 		// or create it if not
-		r = mech.Unrank(rank).LegalMoves()
+		p := tt._position(rank)
+		r = p.LegalMoves()
 		tt.legalMoves[rank] = r
 	}
 
@@ -39,7 +64,7 @@ func (tt *TT) MovesInHand(rank int64) int8 {
 
 	if !ok {
 		// or create it if not
-		r = mech.Unrank(rank).MovesInHand()
+		r = tt._position(rank).MovesInHand()
 		tt.movesInHand[rank] = r
 	}
 

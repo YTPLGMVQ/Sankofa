@@ -37,6 +37,7 @@ type TT struct {
 	old *TT
 
 	// memoization of CPU-intensive evaluations
+	positions   map[int64]*mech.Position
 	legalMoves  map[int64]*mech.LegalMoves
 	movesInHand map[int64]int8
 
@@ -79,6 +80,7 @@ type TT struct {
 func NewTT(game *mech.Game) *TT {
 	tt := new(TT)
 	tt.tt = make(map[int64]*Interval, TT_CAP)
+	tt.positions = make(map[int64]*mech.Position, TT_CAP)
 	tt.legalMoves = make(map[int64]*mech.LegalMoves, TT_CAP)
 	tt.movesInHand = make(map[int64]int8, TT_CAP)
 
