@@ -42,17 +42,17 @@ const GIGA64F = float64(GIGA)
 var Rng = rand.New(rand.NewSource(time.Now().UTC().UnixNano()))
 
 // is this integer even?
-func Even[N int8 | int64 | int](i N) bool {
+func Even[N ~int8 | ~int64 | ~int](i N) bool {
 	return i%2 == 0
 }
 
 // is this integer odd?
-func Odd[N int8 | int64 | int](i N) bool {
+func Odd[N ~int8 | ~int64 | ~int](i N) bool {
 	return !Even(i)
 }
 
 // -1 ** i
-func Alternate[N int8 | int64 | int](i N) N {
+func Alternate[N ~int8 | ~int64 | ~int](i N) N {
 	if Even(i) {
 		return 1
 	} else {
@@ -60,7 +60,7 @@ func Alternate[N int8 | int64 | int](i N) N {
 	}
 }
 
-func Max[N int8 | int64 | int | float64](i, j N) N {
+func Max[N ~int8 | ~int64 | ~int | float64](i, j N) N {
 	if i > j {
 		return i
 	} else {
@@ -68,7 +68,7 @@ func Max[N int8 | int64 | int | float64](i, j N) N {
 	}
 }
 
-func Min[N int8 | int64 | int | float64](i, j N) N {
+func Min[N ~int8 | ~int64 | ~int | float64](i, j N) N {
 	if i < j {
 		return i
 	} else {
@@ -79,7 +79,7 @@ func Min[N int8 | int64 | int | float64](i, j N) N {
 // absolute value of an integer;
 //
 // golang only offers this functionality for floats
-func Abs[N int8 | int64 | int](i N) N {
+func Abs[N ~int8 | ~int64 | ~int](i N) N {
 	if i > 0 {
 		return i
 	} else {
@@ -90,7 +90,7 @@ func Abs[N int8 | int64 | int](i N) N {
 // x ** n
 //
 // v. TAOCP 4.6.3
-func Pow[N int8 | int64 | int](x, n N) N {
+func Pow[N ~int8 | ~int64 | ~int](x, n N) N {
 	pow := N(1)
 	for n > 0 {
 		if n&1 != 0 {

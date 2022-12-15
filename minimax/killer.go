@@ -30,7 +30,7 @@ func (tt *TT) Position(rank int64) *mech.Position {
 	return tt._position(rank)
 }
 
-// μολων λαβε; lazy memeoization
+// lazy memeoization
 func (tt *TT) LegalMoves(rank int64) *mech.LegalMoves {
 	var r *mech.LegalMoves
 

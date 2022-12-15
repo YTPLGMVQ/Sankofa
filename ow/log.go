@@ -33,7 +33,7 @@ var Verbose bool = true
 var printer = message.NewPrinter(message.MatchLanguage("en"))
 
 // logger with call trace and goroutine number (yes, it's possible and useful)
-func Log(message ...interface{}) {
+func Log(message ...any) {
 	var prefix string
 	if !Verbose {
 		return
@@ -57,7 +57,7 @@ func Log(message ...interface{}) {
 // dump stack trace, print error message and exit
 //
 // this is NOT Golang's panic() and there is no try-catch mechanism!
-func Panic(message ...interface{}) {
+func Panic(message ...any) {
 	fmt.Fprintln(os.Stderr, "Guru Meditation ⇢", message)
 	debug.PrintStack()
 	os.Exit(42)
