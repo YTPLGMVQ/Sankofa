@@ -16,7 +16,7 @@ func main() {
 	// proper usage message
 	flag.Usage = func() {
 		flag.CommandLine.SetOutput(os.Stdout)
-		fmt.Fprintln(os.Stdout, `SANKOFA is the bird that looks back into to the past in order to understand the future.
+		fmt.Fprintln(os.Stdout, `SANKOFA is the bird that looks back into the past in order to understand the future.
 This application is for the analysis of Oware games.
 Our goal is to enable players to recognize and to learn from their mistakes and to try alternative strategies.
 The following variant of the Oware rules apply:
