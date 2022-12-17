@@ -11,10 +11,13 @@ The retrograde analysis takes some shortcuts for the sake of performance:
 * stops once it has reached all possible positions for a level. Revisiting some could improve the evaluation.
 * takes a huge amount of time to process the positions with many stones: useable only for end-games
 
-# Build
+# Build and Run
 
 * you need Golang to build this application
 * run 'go install ./...' to build and install into ~/go/bin
+* optional: run '~/go/bin/retrograde' to build a small end-game database
+* run '~/go/bin/sankofa'
+* open 'http://localhost:10000' in a Web browser with CSS and SVG capabilities
 
 # Oware
 
