@@ -155,7 +155,12 @@ func Analysis(trail string) *Game {
 			game.moves[i].position = mech.Unrank(rank)
 			// ⇢ αβ
 			game.moves[i].scored = game.tt.Known(rank)
-			game.moves[i].αβ = game.tt.Interval(rank).Reverse().String()
+			if game.tt.Known(rank) {
+				game.moves[i].αβ = game.tt.Interval(rank).Reverse().Plus(game.game.BeforeCurrent().Score() - game.game.Current().Score()).String()
+			} else {
+				// nil ⇢ string; no need to reverse
+				game.moves[i].αβ = game.tt.Interval(rank).String()
+			}
 
 			// ⇢ δν
 			game.moves[i].δν = game.moves[i].position.MovesInHand() - game.moves[i].position.Reverse().MovesInHand()

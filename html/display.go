@@ -34,7 +34,7 @@ const DEC2 = "⊖" // decrement by several stones
 // WARNING reason for spaghetti: linear story, not much can be reused
 func Display(rest string) string {
 	ow.Log("request:", rest)
-	var html, score string
+	var html string
 
 	fmt.Println("................................................................................")
 	game := mech.StringToGame(rest)
@@ -51,11 +51,11 @@ func Display(rest string) string {
 	html += "<body>\n"
 
 	////////////////////////////////////////////////////////////////
+	// α—β = scores
 	// ν = degrees of freedom = moves-in-hand
 	// Δν = ν advantage when compared to the other side's ν
-	// α—β = scores
 	//
-	// Δν|α—β = position evaluation
+	// α—β|Δν = position evaluation
 	////////////////////////////////////////////////////////////////
 
 	////////////////////////////////////////////////////////////////
@@ -67,22 +67,20 @@ func Display(rest string) string {
 	html += "<tr>\n"
 	if ow.Odd(Analysis.game.Cursor) {
 		// N to move
-		html += "<th title=\"Δν=moves-in-hand advantage; α—β=predicted score\">Δν|α—β&nbsp;&nbsp;</th>\n"
-
-		score = Analysis.north.αβ
-		html += "<td title=\"♟︎ Δν|α—β\">" + ow.Thousands(Analysis.north.δν) + "|" + score + "</td>\n"
+		html += "<th title=\"Δν=moves-in-hand advantage; α—β=predicted score\">α—β|Δν&nbsp;&nbsp;</th>\n"
+		html += "<td title=\"♟︎ α—β|Δν\">" + Analysis.north.αβ + "|" + ow.Thousands(Analysis.north.δν) + "</td>\n"
 
 		// ... moves
 		for i := mech.NORTHRIGHT; i >= mech.NORTHLEFT; i-- {
 			if Analysis.moves[i].movable {
 				// highlight recommended move
 				if ow.Odd(Analysis.game.Cursor) && Analysis.moves[i].attack {
-					html += "<th title=\"♟︎ Δν|α—β after moving " + mech.MoveToString(i) + "\">"
+					html += "<th title=\"♟︎ α—β|Δν after moving " + mech.MoveToString(i) + "\">"
 				} else {
-					html += "<td title=\"♟︎ Δν|α—β after moving " + mech.MoveToString(i) + "\">"
+					html += "<td title=\"♟︎ α—β|Δν after moving " + mech.MoveToString(i) + "\">"
 				}
-				html += ow.Thousands(-Analysis.moves[i].δν)
-				html += "|" + Analysis.moves[i].αβ
+				html += Analysis.moves[i].αβ
+				html += "|" + ow.Thousands(-Analysis.moves[i].δν)
 				// highlight attacks
 				if ow.Odd(Analysis.game.Cursor) && Analysis.moves[i].attack {
 					html += "</th>"
@@ -219,20 +217,21 @@ func Display(rest string) string {
 	html += "<tr>\n"
 	if ow.Even(Analysis.game.Cursor) {
 		// S to move
-		html += "<th title=\"Δν=moves-in-hand advantage; α—β=predicted score\">Δν|α—β&nbsp;&nbsp;</th>\n"
-		html += "<td title=\"♙ Δν|α—β\">" + ow.Thousands(Analysis.south.δν) + "|" + Analysis.south.αβ + "</td>\n"
+		html += "<th title=\"Δν=moves-in-hand advantage; α—β=predicted score\">α—β|Δν&nbsp;&nbsp;</th>\n"
+		html += "<td title=\"♙ α—β|Δν\">" + Analysis.south.αβ + "|" + ow.Thousands(Analysis.south.δν) + "</td>\n"
 
 		// ... moves
 		for i := mech.SOUTHLEFT; i <= mech.SOUTHRIGHT; i++ {
 			if Analysis.moves[i].movable {
 				// highlight recommended move
 				if ow.Even(Analysis.game.Cursor) && Analysis.moves[i].attack {
-					html += "<th title=\"♙ Δν|α—β after moving " + mech.MoveToString(i) + "\">"
+					html += "<th title=\"♙ α—β|Δν after moving " + mech.MoveToString(i) + "\">"
 				} else {
-					html += "<td title=\"♙ Δν|α—β after moving " + mech.MoveToString(i) + "\">"
+					html += "<td title=\"♙ α—β|Δν after moving " + mech.MoveToString(i) + "\">"
 				}
-				html += ow.Thousands(-Analysis.moves[i].δν)
-				html += "|" + Analysis.moves[i].αβ
+				html += Analysis.moves[i].αβ
+				html += "|" + ow.Thousands(-Analysis.moves[i].δν)
+
 				// highlight attacks
 				if ow.Even(Analysis.game.Cursor) && Analysis.moves[i].attack {
 					html += "</th>"

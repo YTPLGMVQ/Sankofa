@@ -72,6 +72,14 @@ func (interval *Interval) Score() int8 {
 	return ow.MININT8
 }
 
+func (interval *Interval) Plus(x int8) *Interval {
+	r := interval.Clone()
+	r.low += x
+	r.high += x
+
+	return r
+}
+
 func (one *Interval) EQ(two *Interval) bool {
 	if one.rank == two.rank && one.low == two.low && one.high == two.high {
 		return true
