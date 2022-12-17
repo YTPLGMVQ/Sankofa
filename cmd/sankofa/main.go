@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"sankofa/db"
 	"sankofa/html"
 	"sankofa/ow"
 )
@@ -43,6 +44,7 @@ Copyright ©2019-2022 Carlo Monte.
 
 	// command line
 	var ipPort string
+	flag.StringVar(&db.FileName, "d", db.FileName, "database file")
 	flag.IntVar(&html.Goroutines, "g", 5, "number of parallel Go-routines")
 	flag.StringVar(&ipPort, "i", "localhost:10000", "listen on IP:Port")
 	flag.Float64Var(&html.DurationLimit, "t", 1, "response time  in seconds")
@@ -52,6 +54,9 @@ Copyright ©2019-2022 Carlo Monte.
 	// informative output
 	fmt.Println("................................................................................")
 	fmt.Println("run with -h for HELP")
+
+	// open/create DB file
+	db.Open()
 
 	// start web server
 	http.HandleFunc("/", html.PlayHandler)

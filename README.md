@@ -4,10 +4,17 @@
 Sankofa is the bird that looks back into the past in order to understand the future.
 Our goal is to enable players to recognize and to learn from their mistakes and to try alternative strategies.
 
+**Retrograde** is a helper application that builds a database with the retrograde analysis of the game.
+The retrograde analysis is not perfect:
+* uses the simplified Awari rules which leads to slightly inaccurate scores
+* does not filter for the unreachable positions but processes them like the rest
+* stops once it has reached all possible positions for a level. Revisiting some could improve the evaluation.
+* takes a huge amount of time to process the positions with many stones: useable only for end-games
+
 # Build
 
-Run *make* in order to build and install the application.
-You will need *Golang* and *make* installed.
+* you need Golang to build this application
+* run 'go install ./...' to build and install into ~/go/bin
 
 # Oware
 
@@ -26,7 +33,8 @@ Sankofa provides a MiniMax evaluation of Oware positions featuring:
 * parallel aspiration on discrete quartiles
 * negamax
 * fail-soft α—β pruning
-* simple score heuristic
+* database with retrograde analysis (α—β leaves)
+* simple score heuristic (α—β leaves not in the database)
 
 # License
 

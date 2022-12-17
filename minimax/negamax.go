@@ -28,6 +28,7 @@ package minimax
 
 import (
 	"fmt"
+	"sankofa/db"
 	"sankofa/mech"
 	"sankofa/ow"
 )
@@ -91,9 +92,15 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 		return score, game
 	case depth == 0:
 		// reached recursion depth limit
-		// evaluate score using a heuristic
-		score := game.Heuristic()
-		ow.Log(game, "⇠bottom:", game, "|", game.Current().Board, "score:", score)
+		// search for a score in the database
+		score, ini := db.GetScore(rank)
+		if ini {
+			ow.Log(game, "⇠bottom/database:", game, "|", game.Current().Board, "score:", score)
+		} else {
+			// evaluate score using a heuristic
+			score = game.Heuristic()
+			ow.Log(game, "⇠bottom/heuristic:", game, "|", game.Current().Board, "score:", score)
+		}
 		tt.incBottom()
 		trace("<< bottom", game, score, α, β, legalMoves)
 		return score, game
