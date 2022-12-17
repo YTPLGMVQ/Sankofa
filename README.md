@@ -7,7 +7,7 @@ Our goal is to enable players to recognize and to learn from their mistakes and 
 **Retrograde** is a helper application that builds a database with the retrograde analysis of the game.
 The retrograde analysis takes some shortcuts for the sake of performance:
 * uses the simplified Awari rules which leads to slightly inaccurate scores
-* does not filter for the unreachable positions but processes them like the rest
+* does not filter out the unreachable positions but processes them like the rest
 * stops once it has reached all possible positions for a level. Revisiting some could improve the evaluation.
 * takes a huge amount of time to process the positions with many stones: useable only for end-games
 
