@@ -5,7 +5,7 @@ Sankofa is the bird that looks back into the past in order to understand the fut
 Our goal is to enable players to recognize and to learn from their mistakes and to try alternative strategies.
 
 **Retrograde** is a helper application that builds a database with the retrograde analysis of the game.
-The retrograde analysis is not perfect:
+The retrograde analysis takes some shortcuts for the sake of performance:
 * uses the simplified Awari rules which leads to slightly inaccurate scores
 * does not filter for the unreachable positions but processes them like the rest
 * stops once it has reached all possible positions for a level. Revisiting some could improve the evaluation.
