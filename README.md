@@ -14,7 +14,10 @@ The retrograde analysis takes some shortcuts for the sake of performance:
 # Build and Run
 
 * you need Golang to build this application
-* run 'go install ./...' to build and install into ~/go/bin
+* to build and install into ~/go/bin, run:
+	- 'go mod init sankofa'
+	- 'go mod tidy'
+	- 'go install ./...'
 * optional: run '~/go/bin/retrograde' to build a small end-game database
 * run '~/go/bin/sankofa'
 * open 'http://localhost:10000' in a Web browser with CSS and SVG capabilities
