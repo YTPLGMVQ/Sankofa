@@ -95,13 +95,14 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 		// search for a score in the database
 		score, ini := db.GetScore(rank)
 		if ini {
-			ow.Log(game, "⇠bottom/database:", game, "|", game.Current().Board, "score:", score)
+			ow.Log(game, "⇠bottom+database:", game, "|", game.Current().Board, "score:", score)
+			tt.incDatabase()
 		} else {
 			// evaluate score using a heuristic
 			score = game.Heuristic()
-			ow.Log(game, "⇠bottom/heuristic:", game, "|", game.Current().Board, "score:", score)
+			ow.Log(game, "⇠bottom+heuristic:", game, "|", game.Current().Board, "score:", score)
+			tt.incHeuristic()
 		}
-		tt.incBottom()
 		trace("<< bottom", game, score, α, β, legalMoves)
 		return score, game
 	case tt.IterationAborted() || tt.DeepenerAborted():

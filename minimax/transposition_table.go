@@ -68,7 +68,8 @@ type TT struct {
 	cntMovesInHand int // retrievals from the movesInHand table
 	cutOff         int // number of cutoffs
 	over           int // game over (won, starved or cycle)
-	bottom         int // number of heurstic nodes at the bottom of the tree
+	database       int // number of bottom-level nodes using scores from the database
+	heuristic      int // number of bottom-level nodes evaluated using the heuristic
 	killed         int // number of interrupted goroutines
 }
 
@@ -106,7 +107,8 @@ func (tt *TT) String() string {
 	r := tt.game.String() +
 		" | visited: " + ow.Thousands(tt.visited) +
 		", Σ: " + ow.Thousands(tt.cumVisited) +
-		", bottom: " + ow.Thousands(tt.bottom) +
+		", database: " + ow.Thousands(tt.database) +
+		", heuristic: " + ow.Thousands(tt.heuristic) +
 		", game-over: " + ow.Thousands(tt.over) +
 		" | depth: " + ow.Thousands(tt.depth-tt.base) +
 		", killed: " + ow.Thousands(tt.killed) +
@@ -448,11 +450,19 @@ func (tt *TT) incOver() *TT {
 	return tt
 }
 
-func (tt *TT) incBottom() *TT {
+func (tt *TT) incDatabase() *TT {
 	tt.mutex.Lock()
 	defer tt.mutex.Unlock()
 
-	tt.bottom++
+	tt.database++
+	return tt
+}
+
+func (tt *TT) incHeuristic() *TT {
+	tt.mutex.Lock()
+	defer tt.mutex.Unlock()
+
+	tt.heuristic++
 	return tt
 }
 

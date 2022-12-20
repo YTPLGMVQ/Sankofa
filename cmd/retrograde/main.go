@@ -52,7 +52,7 @@ func main() {
 * Additional iterations may further improve the score accuracy, but are avoided for performance reasons.
 * A partial database can be used by SANKOFA.
 * The complete databse (1.1TB) requires a very long processing time.
-* Unreaschable nodes are scored as well. No significant performance improvement is expected by avoiding them.
+* Unreachable nodes are scored as well. No significant performance improvement is expected by avoiding them.
 Copyright ©2019-2022 Carlo Monte.
 ................................................................................`)
 		fmt.Fprintf(os.Stdout, "%s: start a Web server that shows an interactive Oware board\n", os.Args[0])

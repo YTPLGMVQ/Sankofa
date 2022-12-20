@@ -18,6 +18,7 @@ The retrograde analysis takes some shortcuts for the sake of performance:
 * optional: run '~/go/bin/retrograde' to build a small end-game database
 * run '~/go/bin/sankofa'
 * open 'http://localhost:10000' in a Web browser with CSS and SVG capabilities
+* '-h' parameter for help on the command line
 
 # Oware
 
