@@ -1,0 +1,12 @@
+syntax: glob
+.#*
+#*
+*~
+*.out
+*.LOG
+go.mod
+go.sum
+.RData
+.Rhistory
+bin/*
+temp
