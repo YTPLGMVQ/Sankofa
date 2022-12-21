@@ -20,6 +20,9 @@
 //   - negamax returns the *Game steps corresponding to the found score
 //   - parallel aspiration has a bit transaction block that uses the non-locking inner methods
 //   - WARNING negamax may return an empty or a truncated continuation when it returns a score from *TT
+//   - a DB read operation is about one order of magnitude slower than the trivial heuristic we employ.
+//     DB scores are only used for the leaves, since we are interested in the game continuation discovered by α—β.
+//     a good compromise is to limit the database to the lower end-game levels e.g., up to 24.
 //
 // # CALL STACK
 //

@@ -156,7 +156,7 @@ func Analysis(trail string) *Game {
 			// ⇢ αβ
 			game.moves[i].scored = game.tt.Known(rank)
 			if game.tt.Known(rank) {
-				game.moves[i].αβ = game.tt.Interval(rank).Reverse().Plus(game.game.BeforeCurrent().Score() - game.game.Current().Score()).String()
+				game.moves[i].αβ = game.tt.Interval(rank).Reverse().Plus(game.game.Current().Score() + game.game.BeforeCurrent().Score()).String()
 			} else {
 				// nil ⇢ string; no need to reverse
 				game.moves[i].αβ = game.tt.Interval(rank).String()
