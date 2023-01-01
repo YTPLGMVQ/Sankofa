@@ -36,7 +36,7 @@ SANKOFA provides a MiniMax evaluation of Oware positions featuring:
 CAVEATS
 * MiniMax adds a heuristic value for the deepest position; the game continuation does not.
 * MiniMax may end early with a saved score from other threads, leading to a truncated game continuation.
-Copyright ©2019-2022 Carlo Monte.
+Copyright ©2019-2023 Carlo Monte.
 ................................................................................`)
 		fmt.Fprintf(os.Stdout, "%s: start a Web server that shows an interactive Oware board\n", os.Args[0])
 		flag.PrintDefaults()

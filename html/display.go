@@ -397,7 +397,7 @@ func Display(rest string) string {
 	////////////////////////////////////////////////////////////////
 	html += `<p>
 <small>
-Copyright ©2019-2022 Carlo Monte.
+Copyright ©2019-2023 Carlo Monte.
 </small>
 </p>
 </body>

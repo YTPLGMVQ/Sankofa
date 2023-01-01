@@ -53,7 +53,7 @@ func main() {
 * A partial database can be used by SANKOFA.
 * The complete databse (1.1TB) requires a very long processing time.
 * Unreachable nodes are scored as well. No significant performance improvement is expected by avoiding them.
-Copyright ©2019-2022 Carlo Monte.
+Copyright ©2019-2023 Carlo Monte.
 ................................................................................`)
 		fmt.Fprintf(os.Stdout, "%s: start a Web server that shows an interactive Oware board\n", os.Args[0])
 		flag.PrintDefaults()
