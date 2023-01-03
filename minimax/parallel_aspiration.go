@@ -52,7 +52,7 @@ func (tt *TT) Worker(α, β int8, depth int) {
 	ow.Log(game, ", [", α, "..", β, "]",
 		", duration:", strconv.FormatFloat(duration, 'f', 2, 64))
 
-	fmt.Println(ow.Thousands(α, β), "⇢", tt.Interval(tt.game.Current().Rank()), game)
+	fmt.Println(ow.Thousands(α, β), "⇢", tt.Interval(tt.Game().Current().Rank()), game)
 
 	// set game if the current go routine found the leading score.
 	// WARNING: the operation is atomic: use lock-less method variants

@@ -51,6 +51,10 @@ func Visit(rank int64) {
 
 	// count changed items
 	if found && max != score {
+		level := ow.Level(rank)
+		if max < -level || max > level {
+			ow.Panic("score:", max, "out of level:", level)
+		}
 		ow.Log("save: rank:", rank, "position:", position, "score ⇢", max)
 		db.SetScore(rank, max)
 	}

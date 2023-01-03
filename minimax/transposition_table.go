@@ -162,10 +162,12 @@ func (tt *TT) setScore(rank int64, α, β, score int8) *TT {
 		ow.Panic("rank:", rank, "α=", α, " > β=", β)
 	}
 
-	// defensive programming: even limits have limits
+	// captures reduce the level and narrow the [α, β] interval
 	level := ow.Level(rank)
-	α = ow.Max(-level, α)
-	β = ow.Min(level, β)
+	// even limits have limits
+	if score < -level || score > level {
+		ow.Panic("score:", score, "out of level:", level)
+	}
 
 	tt.mutex.Lock()
 	defer tt.mutex.Unlock()

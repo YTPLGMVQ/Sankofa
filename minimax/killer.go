@@ -48,7 +48,7 @@ func (tt *TT) LegalMoves(rank int64) *mech.LegalMoves {
 		tt.legalMoves[rank] = r
 	}
 
-	return r
+	return r.Clone()
 }
 
 // lazy memeoization

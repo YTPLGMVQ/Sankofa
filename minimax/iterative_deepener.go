@@ -31,8 +31,9 @@ func (tt *TT) Explore(goroutines int, limit float64) *TT {
 	}
 
 	// make copies, since Alpha and Beta will be used in further iterations
-	a := ow.Max(Alpha, -level)
-	b := ow.Min(Beta, level)
+	// WARNING both α and β can be outside [-level, level] on BOTH sides
+	a := ow.Max(-level, ow.Min(level, Alpha))
+	b := ow.Max(-level, ow.Min(level, Beta))
 
 	// split in so many intervals as many processor cores are available
 	intervals := Quartiles(a, b, level, goroutines)

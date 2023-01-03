@@ -42,6 +42,11 @@ var Complete bool
 // fail-soft NegaMax with α—β pruning and killer-move heuristic;
 // result in return values, not in *TT
 func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game) {
+	// sanity check
+	if β < α {
+		ow.Panic("α=", α, "> β=", β, game)
+	}
+
 	// visit this node
 	tt.incVisited()
 
@@ -137,13 +142,19 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 
 		var s int8
 		var g *mech.Game
-		// first level may not trim α—β interval because we need exact scores (not intervals)
+
+		// trim α—β to plausible score range for this level
+		mv := game.Move(move)
+		lv := ow.Level(mv.Current().Rank())
+		a := ow.Max(-lv, ow.Min(lv, α))
+		b := ow.Max(-lv, ow.Min(lv, β))
+
 		if Complete || tt.Depth()-depth <= 1 {
 			// ignore cuts when traversing the entire tree
-			s, g = tt.NegaMax(game.Move(move), -β, -α, depth-1)
+			s, g = tt.NegaMax(mv, -b, -a, depth-1)
 		} else {
 			// according to Marsland: -ow.Max(α, bestScore)
-			s, g = tt.NegaMax(game.Move(move), -β, -ow.Max(α, ow.Min(β, bestScore)), depth-1)
+			s, g = tt.NegaMax(mv, -b, -ow.Max(a, ow.Min(b, bestScore)), depth-1)
 		}
 
 		t := legalMoves.Score[move] - s // best score candidate

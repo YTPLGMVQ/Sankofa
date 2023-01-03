@@ -198,7 +198,8 @@ func (intervals Intervals) GradientDescent(level int8) {
 func Quartiles(α, β, level int8, partitions int) (r Intervals) {
 	ow.Log("Quartiles: α:", α, "β:", β, "level:", level, "partitions:", partitions)
 
-	r = NewIntervals(ow.Max(α, -level), ow.Min(β, level), partitions)
+	// WARNING both α and β can be outside [-level, level] on BOTH sides
+	r = NewIntervals(ow.Max(-level, ow.Min(level, α)), ow.Max(-level, ow.Min(level, β)), partitions)
 	r.GradientDescent(level)
 
 	fmt.Println(ow.Thousands(α, β), "level=", level, "partitions=", partitions, r)

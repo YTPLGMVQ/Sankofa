@@ -29,6 +29,7 @@ func (interval *Interval) String() string {
 }
 
 func NewInterval(rank int64, low, high int8) *Interval {
+	ow.Log("rank:", rank, ": low:", low, ", high:", high)
 	r := new(Interval)
 	r.rank = rank
 	level := ow.Level(rank)
@@ -39,8 +40,7 @@ func NewInterval(rank int64, low, high int8) *Interval {
 		ow.Panic("high < low:", rank, ":", r)
 	}
 
-	ow.Log("rank:", rank, ": low:", low, ", high:", high, "⇢", r)
-
+	ow.Log(r)
 	return r
 }
 
