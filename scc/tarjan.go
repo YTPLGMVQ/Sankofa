@@ -16,7 +16,7 @@ var lowLink []int64
 var stack *Stack
 
 // membership bit maps
-var stackMember, indexMember big.Int
+var stackMember, indexMember *big.Int
 
 // range
 var high, low int64
@@ -27,6 +27,7 @@ var count int64
 func Tarjan(level int8) (scc []int64) {
 	scc = make([]int64, 0)
 
+	// initialize globals
 	// range
 	ow.Log("level:", level)
 	low = ow.ZERO64
@@ -39,6 +40,8 @@ func Tarjan(level int8) (scc []int64) {
 	index = make([]int64, high-low+1)
 	lowLink = make([]int64, high-low+1)
 	stack = NewStack()
+	stackMember = big.NewInt(0)
+	indexMember = big.NewInt(0)
 
 	for rank := low; rank <= high; rank++ {
 		// WARNING Tarjan only works on 64-bit architectures: indices would overflow an int32
@@ -69,13 +72,13 @@ func strongConnect(rank int64) []int64 {
 	// initialize book keeping
 	index[rank-low] = count
 	// WARNING Tarjan only works on 64-bit architectures: indices would overflow an int32
-	indexMember.SetBit(&indexMember, int(rank-low), 1)
+	indexMember.SetBit(indexMember, int(rank-low), 1)
 	lowLink[rank-low] = count
 	count = count + 1
 
 	// place on stack
 	stack.Push(rank)
-	stackMember.SetBit(&stackMember, int(rank-low), 1)
+	stackMember.SetBit(stackMember, int(rank-low), 1)
 	ow.Log("PUSH:", rank, "index:", index[rank-low], "stack size:", stack.Size())
 
 	// successors
@@ -107,7 +110,7 @@ func strongConnect(rank int64) []int64 {
 		for pop, ok := stack.Pop(); ok; pop, ok = stack.Pop() {
 			size = size + 1
 			// WARNING Tarjan only works on 64-bit architectures: indices would overflow an int32
-			stackMember.SetBit(&stackMember, int(rank-low), 0)
+			stackMember.SetBit(stackMember, int(rank-low), 0)
 			ow.Log("POP:", pop, "index:", index[pop-low], "stack size:", stack.Size())
 			// until reached root
 			if pop == rank {

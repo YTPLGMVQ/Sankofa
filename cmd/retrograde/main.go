@@ -119,10 +119,12 @@ levels:
 		var it int
 
 		if l <= int8(s) {
-			for _, rank := range scc.Tarjan(l) {
+			scc := scc.Tarjan(l)
+			for _, rank := range scc {
+				ow.Log("scc: rank:", rank)
 				db.SetScore(rank, 0)
 			}
-			fmt.Println("strongly connected component member node's scores initialized")
+			fmt.Println(len(scc), "strongly connected component member node's scores initialized")
 		}
 
 		for {
