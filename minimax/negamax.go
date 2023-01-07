@@ -40,8 +40,9 @@ import (
 var Complete bool
 
 // fail-soft NegaMax with α—β pruning and killer-move heuristic;
-// result in return values, not in *TT
-func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game) {
+// modifies the input *TT and returns the game continuation;
+// score and verdict are used internally.
+func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (score, verdict int8, continuation *mech.Game) {
 	// sanity check
 	if β < α {
 		ow.Panic("α=", α, "> β=", β, game)
@@ -59,6 +60,7 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 	position := game.Current()
 	rank := position.Rank()
 	legalMoves := tt.LegalMoves(rank) // for tracing
+	verdict = game.Current().Verdict()
 
 	ow.Log(game, "⇢visit: game:", game, "@", game.Cursor, "position:", position, "legal moves:", legalMoves, "α:", α, "β:", β, "depth:", depth)
 
@@ -69,56 +71,70 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 	////////////////////////////////////////////////////////////////
 
 	switch {
-	case game.Current().GameOver():
-		// do not search past the game ending
-		// give the winner al remaining stones
-		score := game.Current().Split()
-		ow.Log(game, "⇠over:", game, "|", game.Current().Board, "score:", score)
+	case game.Current().FinalScore():
+		// the final score has already been achieved
+		score := ow.ZERO8
+
+		ow.Log(game, "⇠over:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 		tt.incOver()
 		trace("<< over", game, score, α, β, legalMoves)
-		return score, game
-	case position.IsStarved():
+
+		// save score to the transposition table
+		tt.save(rank, α, β, score, verdict)
+
+		return score, verdict, game
+	case position.Starved():
 		// starved (terminal)
 		// cannot use game.Last().Score(), as this is not set if there is no preceding move
-		score := game.Last().Split()
-		tt.setScore(rank, α, β, score)
-		ow.Log(game, "⇠starved:", game, "|", game.Current().Board, "score:", score)
+		score := game.Current().SaveSplit()
+		verdict = game.Current().Verdict() // score changed by operation above
+
+		ow.Log(game, "⇠starved:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 		tt.incOver()
 		trace("<< starved", game, score, α, β, legalMoves)
-		return score, game
+
+		// save score to the transposition table
+		tt.save(rank, α, β, score, verdict)
+
+		return score, mech.LOSS, game
 	case game.Cycle():
 		// cycle (terminal)
 		score := game.Capture()
-		ow.Log(game, "⇠cycle:", game, "|", game.Current().Board, "score:", score)
+		ow.Log(game, "⇠cycle:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 		tt.incOver()
 		trace("<< cycle", game, score, α, β, legalMoves)
-		return score, game
-	case tt.Known(rank) && tt.Interval(rank).IsFinal():
-		score := tt.Interval(rank).Score()
+
+		// save score to the transposition table
+		tt.save(rank, α, β, score, verdict)
+
+		return score, verdict, game
+	case tt.Known(rank) && tt.Interval(rank).Scored():
+		i := tt.Interval(rank)
+		score, verdict := i.Score(), i.Verdict()
 		// counter incremented by *TT.Interval() call
-		ow.Log(game, "⇠TT:", game, "|", game.Current().Board, "score:", score)
-		return score, game
+		ow.Log(game, "⇠TT:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
+		return score, verdict, game
 	case depth == 0:
 		// reached recursion depth limit
 		// search for a score in the database
 		score, ini := db.GetScore(rank)
 		if ini {
-			ow.Log(game, "⇠bottom+database:", game, "|", game.Current().Board, "score:", score)
+			ow.Log(game, "⇠bottom+database:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 			tt.incDatabase()
 		} else {
 			// evaluate score using a heuristic
 			score = game.Heuristic()
-			ow.Log(game, "⇠bottom+heuristic:", game, "|", game.Current().Board, "score:", score)
+			ow.Log(game, "⇠bottom+heuristic:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 			tt.incHeuristic()
 		}
 		trace("<< bottom", game, score, α, β, legalMoves)
-		return score, game
+		return score, verdict, game
 	case tt.IterationAborted() || tt.DeepenerAborted():
 		// stop processing
 		score := game.Heuristic()
-		ow.Log(game, "⇠cancelled:", game, "|", game.Current().Board, "score:", score)
+		ow.Log(game, "⇠cancelled:", game, "|", game.Current().Board, "score:", score, "verdict:", verdict)
 		trace("<< done", game, score, α, β, legalMoves)
-		return score, game
+		return score, verdict, game
 	}
 
 	////////////////////////////////////////////////////////////////
@@ -140,7 +156,7 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 		ow.Log(game, "rank:", rank, "killer move:", mech.MoveToString(move), "⇢ successor:", legalMoves.Next[move], ", captures:", legalMoves.Score[move])
 		ow.Log(game, "α:", α, ", best score:", bestScore, ", β:", β)
 
-		var s int8
+		var s, v int8
 		var g *mech.Game
 
 		// trim α—β to plausible score range for this level
@@ -151,10 +167,10 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 
 		if Complete || tt.Depth()-depth <= 1 {
 			// ignore cuts when traversing the entire tree
-			s, g = tt.NegaMax(mv, -b, -a, depth-1)
+			s, v, g = tt.NegaMax(mv, -b, -a, depth-1)
 		} else {
 			// according to Marsland: -ow.Max(α, bestScore)
-			s, g = tt.NegaMax(mv, -b, -ow.Max(a, ow.Min(b, bestScore)), depth-1)
+			s, v, g = tt.NegaMax(mv, -b, -ow.Max(a, ow.Min(b, bestScore)), depth-1)
 		}
 
 		t := legalMoves.Score[move] - s // best score candidate
@@ -170,12 +186,13 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 			}
 
 			bestScore = t
+			verdict = mech.ReverseVerdict(v)
 			bestGame = g
 			bestGame.Cursor = game.Cursor // restore cursor position
 			ow.Log(game, "best score:", bestScore)
 
 			// cut off only when not displaying complete tree and not at the first level
-			if bestScore >= β && !Complete {
+			if (verdict == mech.WIN || bestScore >= β) && !Complete {
 				if tt.Depth()-depth > 1 {
 					if Trace {
 						// output
@@ -206,8 +223,8 @@ func (tt *TT) NegaMax(game *mech.Game, α, β int8, depth int) (int8, *mech.Game
 	}
 
 	// save score to the transposition table
-	tt.setScore(rank, α, β, bestScore)
+	tt.save(rank, α, β, bestScore, verdict)
 
 	trace("<< nmax", bestGame, bestScore, α, β, legalMoves)
-	return bestScore, bestGame
+	return bestScore, verdict, bestGame
 }

@@ -156,8 +156,8 @@ func (tt *TT) Begin() int64 {
 }
 
 // add to a given partial score more partial information from a parallel aspiration thread
-func (tt *TT) setScore(rank int64, α, β, score int8) *TT {
-	ow.Log("rank:", rank, ", α:", α, ", score:", score, ", β:", β)
+func (tt *TT) save(rank int64, α, β, score, verdict int8) *TT {
+	ow.Log("rank:", rank, ", α:", α, ", score:", score, ", β:", β, "verdict:", mech.VerdictToString(verdict))
 	if β < α {
 		ow.Panic("rank:", rank, "α=", α, " > β=", β)
 	}
@@ -174,27 +174,31 @@ func (tt *TT) setScore(rank int64, α, β, score int8) *TT {
 
 	// get it if available
 	old, ok := tt.tt[rank]
-	// if not, create one
 	if !ok {
-		// or create it if not
-		old = NewInterval(rank, ow.MININT8, ow.MAXINT8)
-	} else if old.IsFinal() {
+		// if not, create one
+		old = NewInterval(rank, ow.MININT8, ow.MAXINT8, verdict)
+		ow.Log("initialize:", old)
+	}
+	if old.Scored() {
+		// already done; do not change
+		ow.Log("frozen")
 		return tt
 	}
 
 	var new *Interval
+	// update score
 	switch {
 	case score <= α:
 		// interpretation of fail-soft negamax
 		ow.Log("score <= α")
-		new = NewInterval(rank, -level, score)
+		new = NewInterval(rank, -level, score, verdict)
 	case score >= β:
 		// interpretation of fail-soft negamax
 		ow.Log("score >= β")
-		new = NewInterval(rank, score, level)
+		new = NewInterval(rank, score, level, verdict)
 	default:
 		ow.Log("α < score < β")
-		new = NewInterval(rank, score, score)
+		new = NewInterval(rank, score, score, verdict)
 	}
 
 	if old.Disjoint(new) {

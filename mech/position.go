@@ -162,6 +162,13 @@ func (position *Position) Split() int8 {
 	return position.SouthStones() - position.NorthStones()
 }
 
+// score when each player takes the stones on her side
+func (position *Position) SaveSplit() int8 {
+	position.Scores[0] += position.SouthStones()
+	position.Scores[1] += position.NorthStones()
+	return position.Split()
+}
+
 // score at this position;
 // Game.int8() etc. is responsibile for the book keeping
 func (position *Position) Score() int8 {
@@ -170,7 +177,7 @@ func (position *Position) Score() int8 {
 
 // is South left without stones (starved)?;
 // starving the opponent is allowed only when there are no feeding int8s left
-func (position *Position) IsStarved() bool {
+func (position *Position) Starved() bool {
 	for i := SOUTHLEFT; i <= SOUTHRIGHT; i++ {
 		if position.Board[i] > 0 {
 			return false
@@ -179,36 +186,14 @@ func (position *Position) IsStarved() bool {
 	return true
 }
 
-// is it a win?
-func (position *Position) IsWin() bool {
-	if position.Scores[0] > MAXSTONES/2 {
-		ow.Log("win:", position.Board)
-		return true
-	}
-	return false
-}
-
-// is it a loss?
-func (position *Position) IsLoss() bool {
-	if position.Scores[1] > MAXSTONES/2 {
-		ow.Log("loss:", position.Board)
-		return true
-	}
-	return false
-}
-
-// is it a draw?
-func (position *Position) IsDraw() bool {
-	if position.Scores[0] == MAXSTONES/2 && position.Scores[1] == MAXSTONES/2 {
-		ow.Log("draw:", position)
-		return true
-	}
-	return false
+// reached final score?
+func (position *Position) FinalScore() bool {
+	return position.Verdict() != OPEN
 }
 
 // game over?
 func (position *Position) GameOver() bool {
-	if position.IsWin() || position.IsLoss() || position.IsDraw() || position.IsStarved() {
+	if position.FinalScore() || position.Starved() {
 		ow.Log("game over", position.Board)
 		return true
 	}

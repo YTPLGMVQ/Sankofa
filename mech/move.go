@@ -66,7 +66,7 @@ func StringToMove(external string) int8 {
 }
 
 // corresponding move on the other side of the table
-func Swap(move int8) (x int8) {
+func ReverseMove(move int8) (x int8) {
 	switch move {
 	case A:
 		x = a
@@ -176,7 +176,7 @@ func (in *Position) Move(move int8) *Position {
 	// grand slam captures nothing
 	// except: when a grand slam is the only possible move
 	// resume at chackpoint
-	if !checkpoint.Reverse().IsStarved() && out.Reverse().IsStarved() {
+	if !checkpoint.Reverse().Starved() && out.Reverse().Starved() {
 		ow.Log("a grand slam captures nothing")
 		out = checkpoint
 	}
@@ -204,7 +204,7 @@ func (in *Game) Move(move int8) *Game {
 	out.Cursor = in.Cursor + 1
 
 	// split stones, if cycle or no legal moves left
-	if out.Cycle() || out.Last().IsStarved() {
+	if out.Cycle() || out.Last().Starved() {
 		// split stones
 		position := out.Last()
 		position.Scores[0] += position.SouthStones()

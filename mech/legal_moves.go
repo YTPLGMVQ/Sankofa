@@ -90,7 +90,7 @@ func (position *Position) LegalMoves() *LegalMoves {
 				allMoves.Score[move] = position.Scores[1] - position.Scores[0] + target.Scores[1] - target.Scores[0]
 			}
 			// only moves that do not leave the opponent starved
-			if target.IsStarved() {
+			if target.Starved() {
 				ow.Log("does not feed:", move)
 			} else {
 				legalMoves.Next[move] = rank

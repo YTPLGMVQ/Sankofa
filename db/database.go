@@ -91,7 +91,7 @@ func Close() {
 	}
 }
 
-func IsOpen() bool {
+func Opened() bool {
 	mutex.RLock()
 	defer mutex.RUnlock()
 	r := isOpen

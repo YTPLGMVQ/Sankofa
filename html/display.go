@@ -310,7 +310,7 @@ func Display(rest string) string {
 		if delta > 0 {
 			move += "+" + ow.Thousands(delta)
 		}
-		if clone.GameOver() || clone.Cycle() || clone.Last().IsStarved() {
+		if clone.GameOver() {
 			if i == len(clone.Positions)-1 {
 				move += " Ω"
 			}
@@ -359,14 +359,14 @@ func Display(rest string) string {
 	if Analysis.game.Cycle() {
 		html += "<tr><th>A repeated position ends the game.</th></tr>\n"
 	}
-	if Analysis.game.Last().IsStarved() {
+	if Analysis.game.Last().Starved() {
 		if ow.Odd(Analysis.game.Cursor) {
 			html += "<tr><th>♟︎ to move but starved.</th></tr>\n"
 		} else {
 			html += "<tr><th>♙ to move but starved.</th></tr>\n"
 		}
 	}
-	if Analysis.game.Last().IsWin() {
+	if Analysis.game.Last().Verdict() == mech.WIN {
 		ow.Log("WIN")
 		if ow.Even(Analysis.game.Cursor) {
 			// South to move
@@ -376,7 +376,7 @@ func Display(rest string) string {
 			html += "<tr><th>♟︎ wins.</th></tr>\n"
 		}
 	}
-	if Analysis.game.Last().IsLoss() {
+	if Analysis.game.Last().Verdict() == mech.LOSS {
 		ow.Log("LOSS")
 		if ow.Even(Analysis.game.Cursor) {
 			// South to move
@@ -386,7 +386,7 @@ func Display(rest string) string {
 			html += "<tr><th>♙ wins.</th></tr>\n"
 		}
 	}
-	if Analysis.game.Last().IsDraw() {
+	if Analysis.game.Last().Verdict() == mech.DRAW {
 		ow.Log("DRAW")
 		html += "<tr><th>Draw game.</th></tr>\n"
 	}

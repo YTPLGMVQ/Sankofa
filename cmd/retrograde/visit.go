@@ -17,7 +17,7 @@ func Visit(rank int64) {
 	ow.Log("rank:", rank, "score:", score)
 
 	position := mech.Unrank(rank)
-	if position.IsStarved() {
+	if position.Starved() {
 		split := position.Split()
 		ow.Log(rank, "starved")
 		if score != split {

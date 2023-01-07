@@ -1,5 +1,3 @@
-// Input SSV table with rank in first column.
-// Add columns for status (UNKNOWN/VISITED/SCC/STARVED/SCORE) and score.
 package main
 
 import (
@@ -10,6 +8,7 @@ import (
 	"runtime/pprof"
 	"sankofa/db"
 	"sankofa/ow"
+	"sankofa/scc"
 	"strconv"
 	"syscall"
 	"time"
@@ -48,6 +47,8 @@ func main() {
 * Awari gives each player half of the seeds on the board (down to ½ a stone); repeated positions have an effective Awari score of 0.
 * Database scores are used in SANKOFA for the leaves of the α—β search tree. The Oware-Awari inaccuracy is thus tolerated.
 * The database is built incrementally, layer for layer, starting with the empty board.
+* Strongly connected components in lower layers discovered using Tarjan's algorithm (single threaded, in-memory).
+* SCC members belong to cycles. Their scores are initialized accordingly.
 * A layer is incrementally processed, until there are no NEW nodes to score.
 * Additional iterations may further improve the score accuracy, but are avoided for performance reasons.
 * A partial database can be used by SANKOFA.
@@ -62,12 +63,14 @@ Copyright ©2019-2023 Carlo Monte.
 	// flags
 	f := int(-1)       // from level
 	t := int(12)       // to level: lowest useable level
+	s := int(12)       // maximum level for SCC initialization
 	var profiling bool // enable profiling
 	//
 	flag.StringVar(&db.FileName, "d", db.FileName, "database file")
 	flag.IntVar(&goroutines, "g", 8, "number of parallel Go-routines")
 	flag.BoolVar(&profiling, "p", false, "enable CPU profiling")
 	flag.IntVar(&f, "f", f, "from level; overrides the saved checkpoint when >0")
+	flag.IntVar(&s, "s", s, "maximum level where to initialize strongly connected component member's scores")
 	flag.IntVar(&t, "t", t, "to level")
 	flag.BoolVar(&ow.Verbose, "v", false, "be chatty")
 	flag.Parse()
@@ -114,6 +117,13 @@ levels:
 		fmt.Println(l, "stones:", fromRank, "⇢", toRank, "=", toRank-fromRank, "ranks")
 
 		var it int
+
+		if l <= int8(s) {
+			for _, rank := range scc.Tarjan(l) {
+				db.SetScore(rank, 0)
+			}
+			fmt.Println("strongly connected component member node's scores initialized")
+		}
 
 		for {
 			it++

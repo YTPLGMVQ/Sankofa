@@ -149,7 +149,7 @@ func (game *Game) String() string {
 		if ow.Even(i) {
 			moves += MoveToString(move)
 		} else {
-			moves += MoveToString(Swap(move))
+			moves += MoveToString(ReverseMove(move))
 		}
 
 		// show score: captures or last position

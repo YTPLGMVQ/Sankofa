@@ -18,7 +18,7 @@ func (tt *TT) Finished() bool {
 	// tt.Game().Current() must have a known score
 	rank := tt.game.Current().Rank()
 	_, ok := tt.tt[rank]
-	if !ok || !tt.tt[rank].IsFinal() {
+	if !ok || !tt.tt[rank].Scored() {
 		return false
 	}
 
@@ -28,7 +28,7 @@ func (tt *TT) Finished() bool {
 		// the rank is finished: it has a final score, not an interval
 		// cannot use tt.Known() since this method locks
 		_, ok := tt.tt[v]
-		if !ok || !tt.tt[v].IsFinal() {
+		if !ok || !tt.tt[v].Scored() {
 			ow.Log("rank:", tt.game.Current(), "move:", mech.MoveToString(k), "next:", v, "not finished")
 			r = false
 			break
@@ -45,7 +45,7 @@ func (tt *TT) Worker(α, β int8, depth int) {
 	timeStamp := time.Now().UTC().UnixNano()
 	ow.Log("α:", α, ", β:", β, ", depth:", depth)
 
-	score, game := tt.NegaMax(tt.Game(), α, β, depth)
+	score, verdict, game := tt.NegaMax(tt.Game(), α, β, depth)
 	game.Cursor = tt.Game().Cursor
 
 	duration := (float64(time.Now().UTC().UnixNano()) - float64(timeStamp)) / ow.GIGA64F
@@ -61,8 +61,8 @@ func (tt *TT) Worker(α, β int8, depth int) {
 		// save the game if a score value (not interval) was found, that matches the negamax return value
 		if !tt.found {
 			rank := game.Current().Rank()
-			if tt._known(rank) && tt._interval(rank).IsFinal() && tt._interval(rank).Score() == score {
-				fmt.Println("continuation ⇢", game, "score±heuristic:", score)
+			if tt._known(rank) && tt._interval(rank).Scored() && tt._interval(rank).Score() == score {
+				fmt.Println("continuation ⇢", game, "score±heuristic:", mech.VerdictToString(verdict), score)
 				tt._setGame(game)
 				tt.found = true
 			}
