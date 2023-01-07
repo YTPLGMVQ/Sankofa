@@ -48,7 +48,7 @@ The following variant of the Oware rules apply:
 * iterates through a level until no new positions may be evaluated.
   Revisiting some positions could improve the level's evaluation.
 * takes a huge amount of time to process the positions with many stones: useable only for end-games
-* we recommend to evalute strongly connected components up to level 12 and the end-game up to level 16.
+* we recommend to evalute strongly connected components up to level 12 and the end-game up to level 18.
 
 # License
 
