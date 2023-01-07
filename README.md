@@ -7,8 +7,8 @@ Our goal is to enable players to recognize and to learn from their mistakes and 
 The application is a Web server and the user interface is presented as a Web page at 'http://localhost:10000'.
 An execution trace is displayed in the shell. Functionalitiy:
 * the user plays both sides in order to explore a game's outcome
-* this application is not an automated opponent
 * all legal moves are playable and their evaluations are shown
+* this application is not an automated opponent
 * hover the cursor over GUI elements for hints
 * access and display any previous position or any position in the proposed continuation
 * build any legal position by adding or removing stones and start from there
@@ -16,14 +16,10 @@ An execution trace is displayed in the shell. Functionalitiy:
 # Build and Run
 
 * you need Golang to build this application
-* to build and install into ~/go/bin, run:
-	- 'go mod init sankofa'
-	- 'go mod tidy'
-	- 'go install ./...'
+* initialize and build: 'go mod init sankofa && go mod tidy && go install ./...'
 * optional: run '~/go/bin/retrograde' to build a small end-game database
-* run '~/go/bin/sankofa'
+* run: '~/go/bin/sankofa -h'
 * open 'http://localhost:10000' in a Web browser with CSS and SVG capabilities
-* '-h' parameter for help on the command line
 
 # Oware
 
@@ -36,7 +32,7 @@ The following variant of the Oware rules apply:
 
 # Algorithm
 
-Sankofa provides a MiniMax evaluation of Oware positions featuring:
+**Sankofa** provides a MiniMax evaluation of Oware positions featuring:
 * iterative deepener
 * transposition table (thread cooperation; killer moves)
 * parallel aspiration on discrete quartiles
@@ -45,15 +41,14 @@ Sankofa provides a MiniMax evaluation of Oware positions featuring:
 * database with retrograde analysis (α—β leaves)
 * simple score heuristic (α—β leaves not in the database)
 
-# End-Game Database
-
-**Retrograde** is a helper application that builds a database with the retrograde analysis of the game.
-It starts with the end-games and incrementally works towards the starting position.
-The retrograde analysis takes some shortcuts for the sake of performance:
-* uses the simplified Awari rules which leads to slightly inaccurate scores
+**Retrograde** builds an end-game database:
+* successively processes "levels" with a given number of stones, from zero upwards
+* uses the simplified Awari rules which lead to slightly inaccurate Oware position evaluations
 * does not filter out the unreachable positions but processes them like the rest
-* stops once it has reached all possible positions for a level. Revisiting some could improve the evaluation.
+* iterates through a level until no new positions may be evaluated.
+  Revisiting some positions could improve the level's evaluation.
 * takes a huge amount of time to process the positions with many stones: useable only for end-games
+* we recommend to evalute strongly connected components up to level 12 and the end-game up to level 16.
 
 # License
 
