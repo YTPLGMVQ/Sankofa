@@ -4,11 +4,11 @@
 //
 // Types:
 //   - ranks are int64
-//   - stones, scores and moves are signed bytes | int8
+//   - stones, scores, moves and verdicts are signed bytes | int8
 //   - array indices are int
 //
 // REASONS
-//   - ranks would overflow int on 32-bit architectures like Rpi0W2
+//   - ranks would overflow int on 32-bit architectures such as Rpi0W2
 //   - a database entry shall be small (1 byte) in order to keep the size acceptable (even so: 1.4TB)
 //   - Golang requires array indices to be int
 //   - even so, some type acrobatics is required, because the flag pacakge cannot produce int8 command line arguments.

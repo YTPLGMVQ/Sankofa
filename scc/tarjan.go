@@ -1,3 +1,22 @@
+// Find all members of strongly-connected components on a given level.
+//
+// Implements Tarjan's SCC algorithm, single-threaded (i.e., single-goroutined), in-memory.
+//
+// The Oware same-level game space is a directed graph G(V, E).
+// Positions are the vertices V and moves without captures are the edges E.
+//
+// A strongly connected component (SCC) of a directed graph is a subraph,
+// s.t. between each pair of vertices v and w there exist paths v⇢w and w⇢v.
+// All vertices in an SCC belong to cycles.
+//
+// Tarjan's algorithm finds all SCCs in linear time, O(|V|+|E|).
+// This is, to our knowledge, the fastest algorithm known.
+// Kossajaru's is somewhat simpler, though somewhat (linear factor) slower.
+//
+// Both Tarjan and Kossajaru are linear-time and linear-space in-memory algorithms.
+// We have no knowledge of a useable parallelization.
+// For this reason, cycles can only be computed for levels with few stones.
+// E.g., it overflows memory at level-14 on an 8GB-RAM computer.
 package scc
 
 import (

@@ -170,7 +170,7 @@ func (position *Position) SaveSplit() int8 {
 }
 
 // score at this position;
-// Game.int8() etc. is responsibile for the book keeping
+// Game.Move() etc. is responsibile for the book keeping
 func (position *Position) Score() int8 {
 	return position.Scores[0] - position.Scores[1]
 }
